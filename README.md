@@ -139,3 +139,21 @@ Classes under `com.aykutuysal.triangleclassifier`:
 
 `domain` package handles numbers and triangle rules, with no command-line parsing, output or logging.
 `input` package parses input texts, constructs domain objects.
+
+## Decisions and trade-offs
+
+- **Exact decimals.** `BigDecimal` preserves input values but requires verbose arithmetic and numeric limits. With `double`, `0.1 + 0.2` slightly exceeds `0.3`, potentially accepting a flat triangle. Integers exclude decimals and can overflow. Comparisons use `compareTo` because `equals` treats `1.0` and `1.00` as different.
+
+- **Immutable, always valid Triangle** Every `Triangle` passes the same checks at creation; callers cannot forget a separate validator. A Java record provides immutability and accessors without boilerplate.
+
+- **Separate responsibilities.** Clearly named classes keep parsing, validation, classification and output independently readable and testable. One class would mean fewer files but mixed responsibilities. Classification could reasonably belong to `Triangle`; a separate classifier makes its rules easy to find and separately testable.
+
+- **Plain Java command-line handling.** Three positional arguments (triangle sides) and two standalone options (-h, -v). Need no framework. Spring would add setup without helping this small program.
+
+- **Distinct errors.** Two exceptions distinguish invalid input text from invalid triangle values.
+
+- **Separate failure exit codes.** `2` means bad input, which the caller must fix. `1` means a failure in the program itself. A single failure code would be simpler, but callers could not tell the two apart.
+
+- **Logging and packaging.** Clear, extendable logging with SL4J. The Shadow Gradle plugin bundles dependencies into one runnable JAR that requires only Java.
+
+A future file or HTTP interface could reuse `Triangle` and `TriangleClassifier` with its own parsing and output. The current CLI needs no interfaces or extra layers.
