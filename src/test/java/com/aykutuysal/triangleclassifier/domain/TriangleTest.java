@@ -113,4 +113,20 @@ final class TriangleTest {
                 InvalidTriangleException.class, () -> new Triangle(side, BigDecimal.ONE, BigDecimal.ONE));
         assertEquals("Side length is outside the supported range: " + side, failure.getMessage());
     }
+
+    @ParameterizedTest(name = "1000 decimal places, last digit {0} -> accepted")
+    @ValueSource(strings = {"0", "1"})
+    void acceptsOneThousandDecimalPlaces(final String lastDigit) {
+        final BigDecimal side = new BigDecimal("1." + "0".repeat(999) + lastDigit);
+        assertDoesNotThrow(() -> new Triangle(side, BigDecimal.ONE, BigDecimal.ONE));
+    }
+
+    @ParameterizedTest(name = "1001 decimal places, last digit {0} -> rejected")
+    @ValueSource(strings = {"0", "1"})
+    void rejectsMoreThanOneThousandDecimalPlaces(final String lastDigit) {
+        final BigDecimal side = new BigDecimal("1." + "0".repeat(1000) + lastDigit);
+        final var failure = assertThrows(
+                InvalidTriangleException.class, () -> new Triangle(side, BigDecimal.ONE, BigDecimal.ONE));
+        assertEquals("Side length must have at most 1000 decimal places: " + side, failure.getMessage());
+    }
 }
