@@ -1,6 +1,6 @@
 # Triangle Classifier
 
-A Java command-line application that classifies three side lengths:
+A Java command-line application that classifies a triangle based on its side lengths.
 
 | Result | Meaning | Example sides |
 |---|---|---|
