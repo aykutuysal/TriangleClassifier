@@ -18,6 +18,8 @@ final class TriangleTest {
             "2147483647, 2147483647, 2147483647",
             // Each side is larger than a long can hold.
             "9223372036854775808, 9223372036854775808, 9223372036854775808",
+            // Exact addition must preserve the tiny side alongside the two large sides.
+            "1e-1000, 1e1000, 1e1000",
     })
     void acceptsValidSides(final BigDecimal sideA, final BigDecimal sideB, final BigDecimal sideC) {
         assertDoesNotThrow(() -> new Triangle(sideA, sideB, sideC));
@@ -49,5 +51,31 @@ final class TriangleTest {
         final var failure = assertThrows(
                 NullPointerException.class, () -> new Triangle(sideA, sideB, sideC));
         assertEquals("Side length must not be null", failure.getMessage());
+    }
+
+    @ParameterizedTest(name = "{0}, {1}, {2} -> flat triangle")
+    @CsvSource({
+            "1, 2, 3, 3",
+            "3, 1, 2, 3",
+            "2, 3, 1, 3",
+            "0.1, 0.2, 0.3, 0.3",
+    })
+    void rejectsFlatTriangles(
+            final BigDecimal sideA, final BigDecimal sideB, final BigDecimal sideC, final String longestSide) {
+        final var failure = assertThrows(InvalidTriangleException.class, () -> new Triangle(sideA, sideB, sideC));
+        assertEquals("Not a triangle: the longest side (" + longestSide
+                + ") must be shorter than the other two combined", failure.getMessage());
+    }
+
+    @ParameterizedTest(name = "{0}, {1}, {2} -> sides cannot meet")
+    @CsvSource({
+            "1, 2, 10",
+            "10, 1, 2",
+            "2, 10, 1",
+    })
+    void rejectsSidesThatCannotMeet(final BigDecimal sideA, final BigDecimal sideB, final BigDecimal sideC) {
+        final var failure = assertThrows(InvalidTriangleException.class, () -> new Triangle(sideA, sideB, sideC));
+        assertEquals("Not a triangle: the longest side (10) must be shorter than the other two combined",
+                failure.getMessage());
     }
 }
