@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,13 @@ final class MainTest {
         assertEquals("Side length must have at most 1000 decimal places: " + side + NEWLINE, result.stderr());
     }
 
+    @Test
+    void returnsOneOnUnexpectedFailure() {
+        final ByteArrayOutputStream err = new ByteArrayOutputStream();
+        assertEquals(1, Main.run(new String[] {"3", "4", "5"}, failingStream(), new PrintStream(err)));
+        assertEquals(0, err.size());
+    }
+
     private static Stream<Arguments> rejectedInputs() {
         return Stream.of(
                 arguments(named("no sides", new String[] {}),
@@ -67,6 +75,15 @@ final class MainTest {
                         "Side length is outside the supported range: 1E+999999999"),
                 arguments(named("side below the range", new String[] {"1", "1", "1e-999999999"}),
                         "Side length is outside the supported range: 1E-999999999"));
+    }
+
+    private static PrintStream failingStream() {
+        return new PrintStream(OutputStream.nullOutputStream()) {
+            @Override
+            public void println(final String text) {
+                throw new IllegalStateException("Simulated failure");
+            }
+        };
     }
 
     private static Result run(final String... args) {

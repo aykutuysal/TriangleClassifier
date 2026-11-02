@@ -8,7 +8,11 @@ import com.aykutuysal.triangleclassifier.input.InvalidInputException;
 import com.aykutuysal.triangleclassifier.input.TriangleParser;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Command-line entry point for TriangleClassifier.
@@ -21,7 +25,15 @@ import java.util.List;
  */
 public final class Main {
 
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
+    /**
+     * Exit Codes
+     * UNEXPECTED_FAILURE and INVALID_INPUT are kept separate so callers can differentiate
+     * bad input, which they must fix, from a failure in the program itself.
+     */
     private static final int EXIT_SUCCESS = 0;
+    private static final int EXIT_UNEXPECTED_FAILURE = 1;
     private static final int EXIT_INVALID_INPUT = 2;
 
     private Main() {}
@@ -46,6 +58,9 @@ public final class Main {
         } catch (final InvalidInputException | InvalidTriangleException e) {
             err.println(e.getMessage());
             return EXIT_INVALID_INPUT;
+        } catch (final RuntimeException e) {
+            log.error("Unexpected failure for arguments: {}", Arrays.asList(args), e);
+            return EXIT_UNEXPECTED_FAILURE;
         }
     }
 
