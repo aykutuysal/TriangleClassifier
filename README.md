@@ -170,3 +170,20 @@ A future file or HTTP interface could reuse `Triangle` and `TriangleClassifier` 
 | Each side has at most 1,000 decimal places, including trailing zeros | A value near 1 passes the range limit but can still have thousands of digits, which makes addition costly |
 
 The last two limits keep every sum to about 2,000 digits.
+
+## Logging
+
+Normal runs log nothing at the default `WARN` level. Show arguments, classifications and rejection details with:
+
+```bash
+TRIANGLE_LOG_LEVEL=DEBUG java -jar build/libs/triangle-classifier.jar 3 4 5
+```
+
+This syntax is for Linux/macOS shells. In PowerShell, set `$env:TRIANGLE_LOG_LEVEL = "DEBUG"` before running Java.
+
+Levels: `TRACE`, `DEBUG`, `INFO`, `WARN`, `ERROR`, `OFF`. Logback treats unknown levels as `DEBUG`. Use `TRIANGLE_LOG_LEVEL`; the generic `LOG_LEVEL` variable has no effect. Unexpected failures log at `ERROR`; input errors print as plain messages.
+
+## Known limitations
+
+- The parser and domain classes supply English messages directly. Translation (if needed in the future) needs a separate message mapping.
+
