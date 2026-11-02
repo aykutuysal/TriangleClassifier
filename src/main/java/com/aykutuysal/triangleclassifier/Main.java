@@ -21,7 +21,10 @@ import org.slf4j.LoggerFactory;
  *
  * <pre>{@code
  * java -jar triangle-classifier.jar 3 4 5
+ * java -jar triangle-classifier.jar --help (or -h)
  * }</pre>
+ *
+ * <p>{@link AppInfo#help()} lists the usage, options and exit codes.
  */
 public final class Main {
 
@@ -47,7 +50,7 @@ public final class Main {
     }
 
     /**
-     * Classifies a triangle and returns the exit code.
+     * Handles an option or classifies a triangle, and returns the exit code.
      * Takes the streams as parameters so tests can call it directly.
      */
     static int run(final String[] args, final PrintStream out, final PrintStream err) {
@@ -55,7 +58,7 @@ public final class Main {
         log.debug("Received arguments: {}", Arrays.asList(args));
 
         try {
-            final String output = classify(args);
+            final String output = isOption(args) ? handleOption(args[0]) : classify(args);
             out.println(output);
             return EXIT_SUCCESS;
         } catch (final InvalidInputException | InvalidTriangleException e) {
@@ -79,5 +82,23 @@ public final class Main {
 
         log.debug("Classified {} as {}", triangle, type);
         return type.label();
+    }
+
+    /**
+     * Returns the help text, and rejects any other option.
+     */
+    private static String handleOption(final String option)
+            throws InvalidInputException {
+        return switch (option) {
+            case "-h", "--help" -> AppInfo.help();
+            default -> throw new InvalidInputException(AppInfo.USAGE);
+        };
+    }
+
+    /**
+     * Returns true if the only argument starts with a dash, like --help, -h
+     */
+    private static boolean isOption(final String[] args) {
+        return args.length == 1 && args[0].startsWith("-");
     }
 }

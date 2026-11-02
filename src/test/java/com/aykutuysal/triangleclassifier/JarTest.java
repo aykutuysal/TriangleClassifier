@@ -39,6 +39,14 @@ final class JarTest {
         assertEquals("Side length must be a number: \"abc\"" + System.lineSeparator(), result.stderr());
     }
 
+    @Test
+    void printsPackagedHelp() throws Exception {
+        final Result result = runJar(Map.of(), "--help");
+        assertEquals(0, result.exitCode());
+        assertEquals(AppInfo.help() + System.lineSeparator(), result.stdout());
+        assertEquals("", result.stderr());
+    }
+
     @ParameterizedTest(name = "LOG_LEVEL={0} -> ignored")
     @ValueSource(strings = {"WARNING", ""})
     void ignoresGenericLogLevel(final String value) throws Exception {
