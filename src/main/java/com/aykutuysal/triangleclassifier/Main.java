@@ -51,11 +51,15 @@ public final class Main {
      * Takes the streams as parameters so tests can call it directly.
      */
     static int run(final String[] args, final PrintStream out, final PrintStream err) {
+
+        log.debug("Received arguments: {}", Arrays.asList(args));
+
         try {
             final String output = classify(args);
             out.println(output);
             return EXIT_SUCCESS;
         } catch (final InvalidInputException | InvalidTriangleException e) {
+            log.debug("Rejected input", e);
             err.println(e.getMessage());
             return EXIT_INVALID_INPUT;
         } catch (final RuntimeException e) {
@@ -73,6 +77,7 @@ public final class Main {
         final Triangle triangle = TriangleParser.parse(List.of(args));
         final TriangleType type = TriangleClassifier.classify(triangle);
 
+        log.debug("Classified {} as {}", triangle, type);
         return type.label();
     }
 }
