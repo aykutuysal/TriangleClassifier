@@ -44,6 +44,7 @@ public final class AppInfo {
     /**
      * Returns the application name and version, for example {@code triangle-classifier 1.0.0}.
      *
+     * @throws IllegalStateException if the version file is missing or its version is missing or blank
      * @throws UncheckedIOException if the version file cannot be read
      */
     public static String version() {
@@ -52,9 +53,17 @@ public final class AppInfo {
 
     private static String readVersion() {
         try (InputStream resource = AppInfo.class.getResourceAsStream(VERSION_FILE)) {
+            if (resource == null) {
+                throw new IllegalStateException("Version file is missing: " + VERSION_FILE);
+            }
+
             final Properties properties = new Properties();
             properties.load(resource);
-            return properties.getProperty("version");
+            final String version = properties.getProperty("version");
+            if (version == null || version.isBlank()) {
+                throw new IllegalStateException("Version is missing or blank in " + VERSION_FILE);
+            }
+            return version;
         } catch (final IOException e) {
             throw new UncheckedIOException("Cannot read version file: " + VERSION_FILE, e);
         }
