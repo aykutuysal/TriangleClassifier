@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 final class JarTest {
 
@@ -35,6 +37,33 @@ final class JarTest {
         assertEquals(2, result.exitCode());
         assertEquals("", result.stdout());
         assertEquals("Side length must be a number: \"abc\"" + System.lineSeparator(), result.stderr());
+    }
+
+    @ParameterizedTest(name = "LOG_LEVEL={0} -> ignored")
+    @ValueSource(strings = {"WARNING", ""})
+    void ignoresGenericLogLevel(final String value) throws Exception {
+        final Result result = runJar(Map.of("LOG_LEVEL", value), "3", "4", "5");
+        assertEquals(0, result.exitCode());
+        assertEquals(SCALENE, result.stdout());
+        assertEquals("", result.stderr());
+    }
+
+    @Test
+    void debugLogsGoToStderr() throws Exception {
+        final Result result = runJar(Map.of("TRIANGLE_LOG_LEVEL", "DEBUG"), "3", "4", "5");
+        assertEquals(0, result.exitCode());
+        assertEquals(SCALENE, result.stdout());
+        assertTrue(result.stderr().contains("Classified Triangle[sideA=3, sideB=4, sideC=5] as SCALENE"), result.stderr());
+    }
+
+    @Test
+    void debugLogsShowRejectedArgumentsAndCause() throws Exception {
+        final Result result = runJar(Map.of("TRIANGLE_LOG_LEVEL", "DEBUG"), "3", "abc", "5");
+        assertEquals(2, result.exitCode());
+        assertEquals("", result.stdout());
+        assertTrue(result.stderr().contains("Side length must be a number: \"abc\""), result.stderr());
+        assertTrue(result.stderr().contains("[3, abc, 5]"), result.stderr());
+        assertTrue(result.stderr().contains("Caused by: java.lang.NumberFormatException"), result.stderr());
     }
 
     private Result runJar(final Map<String, String> environment, final String... args)
