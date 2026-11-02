@@ -68,12 +68,23 @@ final class TriangleParserTest {
 
     @ParameterizedTest(name = "{0} -> not a number")
     @ValueSource(strings = {
-            "abc", "NaN", "Infinity", "", " 3", "3 ", "1d", "1e", "1e+"
+            "abc", "NaN", "Infinity", "", " 3", "3 ", "1d", "1e", "1e+",
+            "1,2,3", "1,234.5", "abc,def", "5,"
     })
     void rejectsNonNumbers(final String side) {
         final List<String> sides = List.of("3", side, "5");
         final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(sides));
         assertEquals("Side length must be a number: \"" + side + "\"", failure.getMessage());
+        assertInstanceOf(NumberFormatException.class, failure.getCause());
+    }
+
+    @ParameterizedTest(name = "{0} -> comma instead of a dot")
+    @ValueSource(strings = {"1,2", "3,5", "10,25", ",5", "-1,2", "+1,2"})
+    void explainsCommaDecimals(final String side) {
+        final List<String> sides = List.of("3", side, "5");
+        final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(sides));
+        assertEquals(
+                "Side length must use a dot for decimals (for example, 1.2): \"" + side + "\"", failure.getMessage());
         assertInstanceOf(NumberFormatException.class, failure.getCause());
     }
 

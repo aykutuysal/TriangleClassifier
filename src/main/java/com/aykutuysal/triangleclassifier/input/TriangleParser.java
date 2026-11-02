@@ -5,6 +5,7 @@ import com.aykutuysal.triangleclassifier.domain.InvalidTriangleException;
 import com.aykutuysal.triangleclassifier.domain.Triangle;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Converts three side lengths from text into a valid triangle.
@@ -16,6 +17,9 @@ import java.util.List;
 public final class TriangleParser {
 
     private static final int SIDE_COUNT = 3;
+
+    // Recognizes inputs such as 1,2 and ,5 so the error can explain the decimal separator.
+    private static final Pattern COMMA_DECIMAL = Pattern.compile("[+-]?\\d*,\\d+");
 
     private TriangleParser() {}
 
@@ -47,7 +51,14 @@ public final class TriangleParser {
         try {
             return new BigDecimal(text);
         } catch (final NumberFormatException e) {
-            throw new InvalidInputException("Side length must be a number: \"" + text + "\"", e);
+            throw new InvalidInputException(numberFormatErrorMessage(text), e);
         }
+    }
+
+    private static String numberFormatErrorMessage(final String text) {
+        if (COMMA_DECIMAL.matcher(text).matches()) {
+            return "Side length must use a dot for decimals (for example, 1.2): \"" + text + "\"";
+        }
+        return "Side length must be a number: \"" + text + "\"";
     }
 }
