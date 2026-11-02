@@ -157,3 +157,16 @@ Classes under `com.aykutuysal.triangleclassifier`:
 - **Logging and packaging.** Clear, extendable logging with SL4J. The Shadow Gradle plugin bundles dependencies into one runnable JAR that requires only Java.
 
 A future file or HTTP interface could reuse `Triangle` and `TriangleClassifier` with its own parsing and output. The current CLI needs no interfaces or extra layers.
+
+## Triangle limits
+
+`Triangle` rejects values outside these limits and never rounds them.
+
+| Limit | Why |
+|---|---|
+| Each side is positive | A side cannot have zero or negative length |
+| The longest side is shorter than the other two combined | Otherwise the sides cannot meet, or they lie flat with no area (`1 2 3`) |
+| Each side is between `1e-1000` and `1e1000`, inclusive | Adding extreme values exactly can use too much memory, take too long or fail: `1e999999999 + 1` has a billion digits |
+| Each side has at most 1,000 decimal places, including trailing zeros | A value near 1 passes the range limit but can still have thousands of digits, which makes addition costly |
+
+The last two limits keep every sum to about 2,000 digits.
