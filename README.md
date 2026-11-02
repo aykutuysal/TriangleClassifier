@@ -108,10 +108,10 @@ The tests check results and error messages, including values at the numeric limi
 | [TriangleTest](src/test/java/com/aykutuysal/triangleclassifier/domain/TriangleTest.java) | Accepts valid sides; rejects null, zero or negative sides, flat or impossible triangles, and values outside the length or decimal-place limits |
 | [TriangleClassifierTest](src/test/java/com/aykutuysal/triangleclassifier/domain/TriangleClassifierTest.java) | Recognizes all three triangle types regardless of side order; treats `1.0` and `1.00` as equal and detects small length differences |
 | [TriangleParserTest](src/test/java/com/aykutuysal/triangleclassifier/input/TriangleParserTest.java) | Converts supported number formats to the correct values; rejects wrong argument counts, nulls and invalid formats with clear errors |
-| [MainTest](src/test/java/com/aykutuysal/triangleclassifier/MainTest.java) | Produces the expected classification, help, version, error messages and exit codes |
+| [TriangleClassifierAppTest](src/test/java/com/aykutuysal/triangleclassifier/TriangleClassifierAppTest.java) | Produces the expected classification, help, version, error messages and exit codes |
 | [JarTest](src/test/java/com/aykutuysal/triangleclassifier/JarTest.java) | Runs the built JAR and checks logging, help, version, process exit codes and handling of missing or incomplete version files |
 
-`MainTest` calls `Main.run` directly and captures its output without stopping the test runner. `JarTest` launches the built JAR in separate Java processes to check that the packaged application works. Each process has a time limit and writes output to temporary files so a full output pipe cannot block it.
+`TriangleClassifierAppTest` calls `TriangleClassifierApp.run` directly and captures its output without stopping the test runner. `JarTest` launches the built JAR in separate Java processes to check that the packaged application works. Each process has a time limit and writes output to temporary files so a full output pipe cannot block it.
 
 Run tests through Gradle so it builds the JAR first and gives the tests its location and expected build version.
 
@@ -119,16 +119,16 @@ Run tests through Gradle so it builds the JAR first and gives the tests its loca
 
 For input `3 4 5`:
 
-1. `Main` passes the arguments to `TriangleParser`.
+1. `TriangleClassifierApp` passes the arguments to `TriangleParser`.
 2. `TriangleParser` converts the strings to numbers and constructs a `Triangle`.
 3. `Triangle` validates the sides; `TriangleClassifier` returns `SCALENE`.
-4. `Main` prints its label, `Scalene`, and exits successfully.
+4. `TriangleClassifierApp` prints its label, `Scalene`, and exits successfully.
 
 Classes under `com.aykutuysal.triangleclassifier`:
 
 | Class | Responsibility |
 |---|---|
-| [Main](src/main/java/com/aykutuysal/triangleclassifier/Main.java) | Handles options (-h, --version etc.), CLI entry point, prints output, logs failures and chooses the exit code |
+| [TriangleClassifierApp](src/main/java/com/aykutuysal/triangleclassifier/TriangleClassifierApp.java) | Handles options (-h, --version etc.), CLI entry point, prints output, logs failures and chooses the exit code |
 | [AppInfo](src/main/java/com/aykutuysal/triangleclassifier/AppInfo.java) | Provides usage, help and version text |
 | [input.TriangleParser](src/main/java/com/aykutuysal/triangleclassifier/input/TriangleParser.java) | Parses input arguments into a valid Triangle. Checks the argument count and converts text into side lengths |
 | [input.InvalidInputException](src/main/java/com/aykutuysal/triangleclassifier/input/InvalidInputException.java) | Exception for Input Validations |

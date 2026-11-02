@@ -7,15 +7,13 @@ import java.util.Properties;
 
 /**
  * Provides the application's usage, help and version text.
- * {@link Main} prints the text and chooses the exit code.
+ * {@link TriangleClassifierApp} prints the text and chooses the exit code.
  */
 public final class AppInfo {
 
     public static final String USAGE = "Usage: java -jar triangle-classifier.jar <side-a> <side-b> <side-c>";
 
     private static final String NAME = "triangle-classifier";
-
-    // Gradle writes the version from build.gradle.kts into this file when building the application.
     private static final String VERSION_FILE = "/version.properties";
     private static final String HELP_TEMPLATE = """
             Classifies a triangle as Equilateral, Isosceles or Scalene from its side lengths.
@@ -31,8 +29,7 @@ public final class AppInfo {
               1  Unexpected failure
               2  Invalid input""";
 
-    private AppInfo() {
-    }
+    private AppInfo() {}
 
     /**
      * Returns the usage, available options and exit codes.

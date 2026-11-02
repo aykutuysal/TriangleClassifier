@@ -21,10 +21,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 final class TriangleParserTest {
 
+    private final TriangleParser parser = new TriangleParser();
+
     @Test
     void parsesThreeNumbers() {
         final Triangle expected = new Triangle(new BigDecimal("3"), new BigDecimal("4"), new BigDecimal("5"));
-        assertEquals(expected, TriangleParser.parse(List.of("3", "4", "5")));
+        assertEquals(expected, parser.parse(List.of("3", "4", "5")));
     }
 
     @ParameterizedTest(name = "{0} -> {1}")
@@ -36,9 +38,8 @@ final class TriangleParserTest {
             "1.0000000000000001, 1.0000000000000001"
     })
     void parsesSupportedNumberFormats(final String text, final BigDecimal expected) {
-        final Triangle triangle = TriangleParser.parse(List.of(text, text, text));
+        final Triangle triangle = parser.parse(List.of(text, text, text));
 
-        // compareTo checks the numeric value, so 1e2 and 100 are equal.
         assertEquals(0, triangle.sideA().compareTo(expected), "side A");
         assertEquals(0, triangle.sideB().compareTo(expected), "side B");
         assertEquals(0, triangle.sideC().compareTo(expected), "side C");
@@ -47,13 +48,13 @@ final class TriangleParserTest {
     @ParameterizedTest(name = "{0} -> wrong argument count")
     @MethodSource("wrongArgumentCounts")
     void rejectsWrongArgumentCount(final List<String> sides) {
-        final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(sides));
+        final var failure = assertThrows(InvalidInputException.class, () -> parser.parse(sides));
         assertEquals(AppInfo.USAGE, failure.getMessage());
     }
 
     @Test
     void rejectsNullList() {
-        final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(null));
+        final var failure = assertThrows(InvalidInputException.class, () -> parser.parse(null));
         assertEquals(AppInfo.USAGE, failure.getMessage());
     }
 
@@ -62,7 +63,7 @@ final class TriangleParserTest {
     void rejectsNullSide(final int position) {
         final List<String> sides = new ArrayList<>(List.of("3", "4", "5"));
         sides.set(position, null);
-        final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(sides));
+        final var failure = assertThrows(InvalidInputException.class, () -> parser.parse(sides));
         assertEquals("Side length must not be null", failure.getMessage());
     }
 
@@ -73,7 +74,7 @@ final class TriangleParserTest {
     })
     void rejectsNonNumbers(final String side) {
         final List<String> sides = List.of("3", side, "5");
-        final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(sides));
+        final var failure = assertThrows(InvalidInputException.class, () -> parser.parse(sides));
         assertEquals("Side length must be a number: \"" + side + "\"", failure.getMessage());
         assertInstanceOf(NumberFormatException.class, failure.getCause());
     }
@@ -82,7 +83,7 @@ final class TriangleParserTest {
     @ValueSource(strings = {"1,2", "3,5", "10,25", ",5", "-1,2", "+1,2"})
     void explainsCommaDecimals(final String side) {
         final List<String> sides = List.of("3", side, "5");
-        final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(sides));
+        final var failure = assertThrows(InvalidInputException.class, () -> parser.parse(sides));
         assertEquals(
                 "Side length must use a dot for decimals (for example, 1.2): \"" + side + "\"", failure.getMessage());
         assertInstanceOf(NumberFormatException.class, failure.getCause());
@@ -96,13 +97,13 @@ final class TriangleParserTest {
     })
     void namesTheBadSide(final String sideA, final String sideB, final String sideC) {
         final List<String> sides = List.of(sideA, sideB, sideC);
-        final var failure = assertThrows(InvalidInputException.class, () -> TriangleParser.parse(sides));
+        final var failure = assertThrows(InvalidInputException.class, () -> parser.parse(sides));
         assertEquals("Side length must be a number: \"abc\"", failure.getMessage());
     }
 
     @Test
     void rejectsSidesThatCannotFormATriangle() {
-        assertThrows(InvalidTriangleException.class, () -> TriangleParser.parse(List.of("1", "2", "10")));
+        assertThrows(InvalidTriangleException.class, () -> parser.parse(List.of("1", "2", "10")));
     }
 
     private static Stream<List<String>> wrongArgumentCounts() {

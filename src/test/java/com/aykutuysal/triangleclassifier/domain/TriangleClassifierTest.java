@@ -10,9 +10,11 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 final class TriangleClassifierTest {
 
+    private final TriangleClassifier classifier = new TriangleClassifier();
+
     @Test
     void rejectsNullTriangle() {
-        final var failure = assertThrows(NullPointerException.class, () -> TriangleClassifier.classify(null));
+        final var failure = assertThrows(NullPointerException.class, () -> classifier.classify(null));
         assertEquals("Triangle must not be null", failure.getMessage());
     }
 
@@ -36,6 +38,6 @@ final class TriangleClassifierTest {
     })
     void classifiesBySideLengths(
             final BigDecimal sideA, final BigDecimal sideB, final BigDecimal sideC, final TriangleType expected) {
-        assertEquals(expected, TriangleClassifier.classify(new Triangle(sideA, sideB, sideC)));
+        assertEquals(expected, classifier.classify(new Triangle(sideA, sideB, sideC)));
     }
 }

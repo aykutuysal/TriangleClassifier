@@ -9,15 +9,13 @@ import java.util.Objects;
  */
 public final class TriangleClassifier {
 
-    private TriangleClassifier() {}
-
     /**
      * Returns equilateral for three equal sides, isosceles for exactly two equal sides,
      * or scalene when all three sides differ.
      *
      * @throws NullPointerException if the triangle is null
      */
-    public static TriangleType classify(final Triangle triangle) {
+    public TriangleType classify(final Triangle triangle) {
 
         Objects.requireNonNull(triangle, "Triangle must not be null");
 
@@ -39,7 +37,7 @@ public final class TriangleClassifier {
 
     // 1.0 and 1.00 represent the same length, but BigDecimal.equals treats them as different.
     // compareTo ignores that difference in decimal places and returns 0 for equal values.
-    private static boolean sameLength(final BigDecimal first, final BigDecimal second) {
+    private boolean sameLength(final BigDecimal first, final BigDecimal second) {
         return first.compareTo(second) == 0;
     }
 }

@@ -21,8 +21,6 @@ public final class TriangleParser {
     // Recognizes inputs such as 1,2 and ,5 so the error can explain the decimal separator.
     private static final Pattern COMMA_DECIMAL = Pattern.compile("[+-]?\\d*,\\d+");
 
-    private TriangleParser() {}
-
     /**
      * Parses exactly three numbers and constructs a triangle.
      *
@@ -30,7 +28,7 @@ public final class TriangleParser {
      *         or an entry is null or cannot be read as a number
      * @throws InvalidTriangleException if the numbers do not meet {@link Triangle}'s rules
      */
-    public static Triangle parse(final List<String> sides) {
+    public Triangle parse(final List<String> sides) {
 
         if (sides == null || sides.size() != SIDE_COUNT) {
             throw new InvalidInputException(AppInfo.USAGE);
@@ -42,7 +40,7 @@ public final class TriangleParser {
                 parseSide(sides.get(2)));
     }
 
-    private static BigDecimal parseSide(final String text) {
+    private BigDecimal parseSide(final String text) {
 
         if (text == null) {
             throw new InvalidInputException("Side length must not be null");
@@ -55,7 +53,7 @@ public final class TriangleParser {
         }
     }
 
-    private static String numberFormatErrorMessage(final String text) {
+    private String numberFormatErrorMessage(final String text) {
         if (COMMA_DECIMAL.matcher(text).matches()) {
             return "Side length must use a dot for decimals (for example, 1.2): \"" + text + "\"";
         }

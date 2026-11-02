@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
+import com.aykutuysal.triangleclassifier.domain.TriangleClassifier;
+import com.aykutuysal.triangleclassifier.input.TriangleParser;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -16,9 +18,12 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-final class MainTest {
+final class TriangleClassifierAppTest {
 
     private static final String NEWLINE = System.lineSeparator();
+
+    private final TriangleClassifierApp app =
+            new TriangleClassifierApp(new TriangleParser(), new TriangleClassifier());
 
     @ParameterizedTest(name = "{0}, {1}, {2} -> {3}")
     @CsvSource({
@@ -77,7 +82,7 @@ final class MainTest {
     @Test
     void returnsOneOnUnexpectedFailure() {
         final ByteArrayOutputStream err = new ByteArrayOutputStream();
-        assertEquals(1, Main.run(new String[] {"3", "4", "5"}, failingStream(), new PrintStream(err)));
+        assertEquals(1, app.run(new String[] {"3", "4", "5"}, failingStream(), new PrintStream(err)));
         assertEquals(0, err.size());
     }
 
@@ -116,10 +121,10 @@ final class MainTest {
         };
     }
 
-    private static Result run(final String... args) {
+    private Result run(final String... args) {
         final ByteArrayOutputStream out = new ByteArrayOutputStream();
         final ByteArrayOutputStream err = new ByteArrayOutputStream();
-        final int exitCode = Main.run(args, new PrintStream(out), new PrintStream(err));
+        final int exitCode = app.run(args, new PrintStream(out), new PrintStream(err));
         return new Result(exitCode, out.toString(), err.toString());
     }
 

@@ -33,7 +33,7 @@ tasks.jar {
 tasks.shadowJar {
     archiveFileName = "triangle-classifier.jar"
     manifest {
-        attributes("Main-Class" to "com.aykutuysal.triangleclassifier.Main")
+        attributes("Main-Class" to "com.aykutuysal.triangleclassifier.TriangleClassifierApp")
     }
 }
 
