@@ -84,3 +84,33 @@ Not a triangle: the longest side (10) must be shorter than the other two combine
 | `0` | Success: classification, help or version printed |
 | `1` | Unexpected application failure |
 | `2` | Invalid input or sides that cannot form a triangle |
+
+## Tests
+
+Run all tests:
+
+```bash
+./gradlew test
+```
+
+Run only `TriangleTest`:
+
+```bash
+./gradlew test --tests '*TriangleTest'
+```
+
+Open `build/reports/tests/test/index.html` in a browser to see the results. `./gradlew build` also runs all tests.
+
+The tests check results and error messages, including values at the numeric limits. JUnit parameterized tests run the same check with several inputs.
+
+| Test class | What it checks |
+|---|---|
+| [TriangleTest](src/test/java/com/aykutuysal/triangleclassifier/domain/TriangleTest.java) | Accepts valid sides; rejects null, zero or negative sides, flat or impossible triangles, and values outside the length or decimal-place limits |
+| [TriangleClassifierTest](src/test/java/com/aykutuysal/triangleclassifier/domain/TriangleClassifierTest.java) | Recognizes all three triangle types regardless of side order; treats `1.0` and `1.00` as equal and detects small length differences |
+| [TriangleParserTest](src/test/java/com/aykutuysal/triangleclassifier/input/TriangleParserTest.java) | Converts supported number formats to the correct values; rejects wrong argument counts, nulls and invalid formats with clear errors |
+| [MainTest](src/test/java/com/aykutuysal/triangleclassifier/MainTest.java) | Produces the expected classification, help, version, error messages and exit codes |
+| [JarTest](src/test/java/com/aykutuysal/triangleclassifier/JarTest.java) | Runs the built JAR and checks logging, help, version, process exit codes and handling of missing or incomplete version files |
+
+`MainTest` calls `Main.run` directly and captures its output without stopping the test runner. `JarTest` launches the built JAR in separate Java processes to check that the packaged application works. Each process has a time limit and writes output to temporary files so a full output pipe cannot block it.
+
+Run tests through Gradle so it builds the JAR first and gives the tests its location and expected build version.
