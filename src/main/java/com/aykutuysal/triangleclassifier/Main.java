@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
  * <pre>{@code
  * java -jar triangle-classifier.jar 3 4 5
  * java -jar triangle-classifier.jar --help (or -h)
+ * java -jar triangle-classifier.jar --version (or -v)
  * }</pre>
  *
  * <p>{@link AppInfo#help()} lists the usage, options and exit codes.
@@ -85,18 +86,19 @@ public final class Main {
     }
 
     /**
-     * Returns the help text, and rejects any other option.
+     * Returns the help or version text, and rejects any other option.
      */
     private static String handleOption(final String option)
             throws InvalidInputException {
         return switch (option) {
             case "-h", "--help" -> AppInfo.help();
+            case "-v", "--version" -> AppInfo.version();
             default -> throw new InvalidInputException(AppInfo.USAGE);
         };
     }
 
     /**
-     * Returns true if the only argument starts with a dash, like --help, -h
+     * Returns true if the only argument starts with a dash, like --help, -v
      */
     private static boolean isOption(final String[] args) {
         return args.length == 1 && args[0].startsWith("-");

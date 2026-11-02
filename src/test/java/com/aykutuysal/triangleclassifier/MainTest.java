@@ -40,9 +40,19 @@ final class MainTest {
         assertEquals(0, result.exitCode());
         assertTrue(result.stdout().contains(AppInfo.USAGE));
         assertTrue(result.stdout().contains("-h, --help"));
+        assertTrue(result.stdout().contains("-v, --version"));
         assertTrue(result.stdout().contains("0  Success"));
         assertTrue(result.stdout().contains("1  Unexpected failure"));
         assertTrue(result.stdout().contains("2  Invalid input"));
+        assertEquals("", result.stderr());
+    }
+
+    @ParameterizedTest(name = "{0} -> prints the version")
+    @ValueSource(strings = {"-v", "--version"})
+    void printsTheVersionOnStdout(final String option) {
+        final Result result = run(option);
+        assertEquals(0, result.exitCode());
+        assertEquals("triangle-classifier " + System.getProperty("expectedVersion") + NEWLINE, result.stdout());
         assertEquals("", result.stderr());
     }
 
@@ -80,6 +90,7 @@ final class MainTest {
                 arguments(named("three sides in one argument", new String[] {"3 4 5"}), AppInfo.USAGE),
                 arguments(named("help combined with a side", new String[] {"--help", "3"}), AppInfo.USAGE),
                 arguments(named("unknown option", new String[] {"--unknown"}), AppInfo.USAGE),
+                arguments(named("version combined with a side", new String[] {"-v", "3"}), AppInfo.USAGE),
                 arguments(named("option used as a side", new String[] {"3", "4", "--help"}),
                         "Side length must be a number: \"--help\""),
                 arguments(named("non-numeric side", new String[] {"3", "abc", "5"}),

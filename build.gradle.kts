@@ -19,6 +19,13 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+tasks.processResources {
+    inputs.property("version", project.version)
+    filesMatching("version.properties") {
+        expand("version" to project.version)
+    }
+}
+
 tasks.jar {
     enabled = false
 }
@@ -39,4 +46,5 @@ tasks.test {
     useJUnitPlatform()
     dependsOn(tasks.shadowJar)
     systemProperty("packagedJar", tasks.shadowJar.get().archiveFile.get().asFile.path)
+    systemProperty("expectedVersion", project.version.toString())
 }

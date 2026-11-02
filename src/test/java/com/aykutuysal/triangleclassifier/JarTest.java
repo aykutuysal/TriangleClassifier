@@ -47,6 +47,15 @@ final class JarTest {
         assertEquals("", result.stderr());
     }
 
+    @Test
+    void printsVersionFromTheBuild() throws Exception {
+        final Result result = runJar(Map.of(), "--version");
+        assertEquals(0, result.exitCode());
+        assertEquals("triangle-classifier " + System.getProperty("expectedVersion") + System.lineSeparator(),
+                result.stdout());
+        assertEquals("", result.stderr());
+    }
+
     @ParameterizedTest(name = "LOG_LEVEL={0} -> ignored")
     @ValueSource(strings = {"WARNING", ""})
     void ignoresGenericLogLevel(final String value) throws Exception {
