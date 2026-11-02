@@ -37,9 +37,11 @@ java -jar build/libs/triangle-classifier.jar <side-a> <side-b> <side-c>
 - Integers, decimals and scientific notation are accepted: `1e2` means `100`.
 - Use a decimal dot (`1.5`), without commas, spaces inside numbers or units such as `cm`.
 
-Example arguments after the JAR path:
+Example arguments after the JAR path, with their exact output.
 
-| Arguments | Result |
+A valid triangle exits with code `0` and prints one word to stdout:
+
+| Arguments | Stdout |
 |---|---|
 | `3 3 3` | `Equilateral` |
 | `3 3 4` | `Isosceles` |
@@ -47,9 +49,29 @@ Example arguments after the JAR path:
 | `0.2 0.3 0.4` | `Scalene` |
 | `1.0 1.00 1` | `Equilateral` |
 | `1e2 100 100.0` | `Equilateral` |
-| `1 2 3` | Error: the triangle would be flat |
-| `-3 4 5` | Error: sides must be positive |
-| `3 abc 5` | Error: each side must be a number |
+
+Rejected input exits with code `2`, leaves stdout empty and prints one line to stderr:
+
+| Case | Arguments | Stderr |
+|---|---|---|
+| Flat triangle | `1 2 3` | `Not a triangle: the longest side (3) must be shorter than the other two combined` |
+| Sides cannot meet | `1 2 10` | `Not a triangle: the longest side (10) must be shorter than the other two combined` |
+| Zero side | `0 1 1` | `Side length must be positive: 0` |
+| Negative side | `-3 4 5` | `Side length must be positive: -3` |
+| Not a number | `3 abc 5` | `Side length must be a number: "abc"` |
+| Option used as a side | `3 4 --help` | `Side length must be a number: "--help"` |
+| Comma instead of a dot | `1,2 2,2 3,2` | `Side length must use a dot for decimals (for example, 1.2): "1,2"` |
+| Side too large | `1e1001 1 1` | `Side length is outside the supported range: 1E+1001` |
+| Side too small | `1 1 1e-1001` | `Side length is outside the supported range: 1E-1001` |
+| Too many decimal places | `1.000…0 1 1` (1,001 zeros, shortened here) | `Side length must have at most 1000 decimal places: 1.000…0` (prints the whole side) |
+| Wrong arguments | No arguments, `3 4`, `3 4 5 6`, `"3 4 5"`, `--unknown`, `--help 3` | `Usage: java -jar triangle-classifier.jar <side-a> <side-b> <side-c>` |
+
+
+| Exit code | Meaning |
+|---|---|
+| `0` | Success: classification, help or version printed |
+| `1` | Unexpected application failure |
+| `2` | Invalid input or sides that cannot form a triangle |
 
 ### Help and version
 
@@ -64,26 +86,6 @@ java -jar build/libs/triangle-classifier.jar --version
 | `--version` | `-v` | Prints the application name and build version |
 
 Use each option alone, without sides or other options. Gradle embeds the version from [build.gradle.kts](build.gradle.kts) in the JAR.
-
-### Output and errors
-
-A classification prints one word to standard output (`stdout`). Help and version also use stdout; errors and logs use standard error (`stderr`).
-
-```bash
-java -jar build/libs/triangle-classifier.jar 1 2 10
-```
-
-This command leaves stdout empty, exits with code `2` and writes to stderr:
-
-```text
-Not a triangle: the longest side (10) must be shorter than the other two combined
-```
-
-| Exit code | Meaning |
-|---|---|
-| `0` | Success: classification, help or version printed |
-| `1` | Unexpected application failure |
-| `2` | Invalid input or sides that cannot form a triangle |
 
 ## Tests
 
@@ -137,26 +139,27 @@ Classes under `com.aykutuysal.triangleclassifier`:
 | [domain.TriangleClassifier](src/main/java/com/aykutuysal/triangleclassifier/domain/TriangleClassifier.java) | Triangle classification logic in one place, separately testable, extendable for later. |
 | [domain.TriangleType](src/main/java/com/aykutuysal/triangleclassifier/domain/TriangleType.java) | Defines the three types and their output labels |
 
-`domain` package handles numbers and triangle rules, with no command-line parsing, output or logging.
+`domain` package handles numbers and triangle rules, with no command-line parsing, no output.
+
 `input` package parses input texts, constructs domain objects.
 
 ## Decisions and trade-offs
 
-- **Exact decimals.** `BigDecimal` preserves input values but requires verbose arithmetic and numeric limits. With `double`, `0.1 + 0.2` slightly exceeds `0.3`, potentially accepting a flat triangle. Integers exclude decimals and can overflow. Comparisons use `compareTo` because `equals` treats `1.0` and `1.00` as different.
+- **Exact decimals.** `BigDecimal` stores each triangle side exactly. `double` makes `0.1 + 0.2` slightly more than `0.3`, so it could accept an invalid triangle. Integers can't hold decimals and can overflow. Triangle sides are compared with `compareTo`, because `equals` treats `1.0` and `1.00` as different.
 
-- **Immutable, always valid Triangle** Every `Triangle` passes the same checks at creation; callers cannot forget a separate validator. A Java record provides immutability and accessors without boilerplate.
+- **Immutable, always valid `Triangle`.** Every `Triangle` is checked when it's created, so no caller can forget to validate it. It's a Java record, so it can't change afterwards and needs very little code.
 
-- **Separate responsibilities.** Clearly named classes keep parsing, validation, classification and output independently readable and testable. One class would mean fewer files but mixed responsibilities. Classification could reasonably belong to `Triangle`; a separate classifier makes its rules easy to find and separately testable.
+- **Separate responsibilities.** Each class has one job, so it's easy to read and test on its own. Classification can live in `Triangle` as well, but a separate class makes it easier to test and extend.
 
-- **Plain Java command-line handling.** Three positional arguments (triangle sides) and two standalone options (-h, -v). Need no framework. Spring would add setup without helping this small program.
+- **Plain Java command-line handling.** The program only accepts three side lengths, `--help` or `--version`. Plain Java handles that easily, and a framework like Spring would only add setup.
 
 - **Distinct errors.** Two exceptions distinguish invalid input text from invalid triangle values.
 
-- **Separate failure exit codes.** `2` means bad input, which the caller must fix. `1` means a failure in the program itself. A single failure code would be simpler, but callers could not tell the two apart.
+- **Separate failure exit codes.** `2` means the input is wrong and the user must fix it. `1` means the program itself failed. One failure code would be simpler, but callers couldn't tell the two apart.
 
 - **Logging and packaging.** Clear, extendable logging with SL4J. The Shadow Gradle plugin bundles dependencies into one runnable JAR that requires only Java.
 
-A future file or HTTP interface could reuse `Triangle` and `TriangleClassifier` with its own parsing and output. The current CLI needs no interfaces or extra layers.
+A file or HTTP version could reuse `Triangle` and `TriangleClassifier` and add its own parsing and output. Today's program needs no Java interfaces or extra layers.
 
 ## Triangle limits
 
