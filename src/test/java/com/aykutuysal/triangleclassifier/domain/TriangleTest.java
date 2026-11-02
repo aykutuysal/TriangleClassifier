@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 final class TriangleTest {
 
@@ -77,5 +79,38 @@ final class TriangleTest {
         final var failure = assertThrows(InvalidTriangleException.class, () -> new Triangle(sideA, sideB, sideC));
         assertEquals("Not a triangle: the longest side (10) must be shorter than the other two combined",
                 failure.getMessage());
+    }
+
+    @ParameterizedTest(name = "{0} -> accepted")
+    @ValueSource(strings = {"1e1000", "1e-1000"})
+    void acceptsSidesAtTheLimits(final BigDecimal side) {
+        assertDoesNotThrow(() -> new Triangle(side, side, side));
+    }
+
+    @ParameterizedTest(name = "{0} -> outside the range")
+    @ValueSource(strings = {
+            "1.1e1000",
+            "9e-1001",
+            "1e1001",
+            "1e-1001",
+            "1e999999999",
+            "1e-999999999",
+            "1e2147483647",
+            "1e-2147483647",
+            // BigDecimal accepts this exponent, but its scale is Integer.MIN_VALUE.
+            "1e2147483648",
+    })
+    void rejectsSidesBeyondTheLimits(final BigDecimal side) {
+        final var failure = assertThrows(
+                InvalidTriangleException.class, () -> new Triangle(side, BigDecimal.ONE, BigDecimal.ONE));
+        assertEquals("Side length is outside the supported range: " + side, failure.getMessage());
+    }
+
+    @Test
+    void rejectsTooLargeNumberWrittenInFull() {
+        final BigDecimal side = new BigDecimal("1" + "0".repeat(1500));
+        final var failure = assertThrows(
+                InvalidTriangleException.class, () -> new Triangle(side, BigDecimal.ONE, BigDecimal.ONE));
+        assertEquals("Side length is outside the supported range: " + side, failure.getMessage());
     }
 }
