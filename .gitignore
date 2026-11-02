@@ -1,0 +1,25 @@
+.gradle/
+build/
+.idea/
+*.iml
+docs/
+
+# AI tooling
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+.agents/
+AGENTS.md
+skills-lock.json
+.superpowers/
+.codex/
+.gemini/
+GEMINI.md
+.cursor/
+.cursorrules
+.github/copilot-instructions.md
+.windsurf/
+.windsurfrules
+.clinerules
+.continue/
+.aider*
