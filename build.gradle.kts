@@ -1,5 +1,6 @@
 plugins {
     java
+    id("com.gradleup.shadow") version "9.6.1"
 }
 
 group = "com.aykutuysal"
@@ -18,6 +19,17 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+tasks.jar {
+    enabled = false
+}
+
+tasks.shadowJar {
+    archiveFileName = "triangle-classifier.jar"
+    manifest {
+        attributes("Main-Class" to "com.aykutuysal.triangleclassifier.Main")
+    }
+}
+
 tasks.withType<JavaCompile>().configureEach {
     options.release = 21
     options.encoding = "UTF-8"
@@ -25,4 +37,6 @@ tasks.withType<JavaCompile>().configureEach {
 
 tasks.test {
     useJUnitPlatform()
+    dependsOn(tasks.shadowJar)
+    systemProperty("packagedJar", tasks.shadowJar.get().archiveFile.get().asFile.path)
 }
